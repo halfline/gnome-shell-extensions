@@ -1865,12 +1865,10 @@ StScrollBar {
   border-bottom: 1px solid #666;
   app-icon-bottom-clip: 0px; }
   #panel:overview {
-    background-color: #000;
-    background-gradient-end: #000;
-    border-top-color: #000;
-    border-bottom: 1px solid #000; }
+    background-color: #e0e0e0;
+    background-gradient-end: #d4d4d4; }
     #panel:overview .panel-button {
-      color: #fff; }
+      color: #222728; }
   #panel .panel-button {
     -natural-hpadding: 8px;
     -minimum-hpadding: 4px;
