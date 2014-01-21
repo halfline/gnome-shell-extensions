@@ -414,6 +414,11 @@ class ApplicationsButton extends PanelMenu.Button {
 
         let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
 
+        let iconFile = Gio.File.new_for_path('/usr/share/icons/hicolor/scalable/apps/start-here.svg');
+        this._icon = new St.Icon({ gicon: new Gio.FileIcon({ file: iconFile }),
+                                   style_class: 'panel-logo-icon' });
+        hbox.add_actor(this._icon);
+
         this._label = new St.Label({ text: _("Applications"),
                                      y_expand: true,
                                      y_align: Clutter.ActorAlign.CENTER });
