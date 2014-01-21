@@ -1,6 +1,7 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 const Atk = imports.gi.Atk;
+const Gio = imports.gi.Gio;
 const GMenu = imports.gi.GMenu;
 const Lang = imports.lang;
 const Shell = imports.gi.Shell;
@@ -262,6 +263,11 @@ const ApplicationsButton = new Lang.Class({
         this.actor.accessible_role = Atk.Role.LABEL;
 
         let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
+
+        let iconFile = Gio.File.new_for_path('/usr/share/icons/hicolor/scalable/apps/start-here.svg');
+        this._icon = new St.Icon({ gicon: new Gio.FileIcon({ file: iconFile }),
+                                   style_class: 'panel-logo-icon' });
+        hbox.add_actor(this._icon);
 
         this._label = new St.Label({ text: _("Applications"),
                                      y_expand: true,

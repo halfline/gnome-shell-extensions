@@ -686,6 +686,9 @@ StScrollBar {
       -st-icon-style: symbolic;
       margin-left: 4px;
       margin-right: 4px; }
+    #panel .panel-button .panel-logo-icon {
+      padding-right: .4em;
+      icon-size: 1em; }
     #panel .panel-button:hover {
       color: #454f52; }
     #panel .panel-button:active, #panel .panel-button:overview, #panel .panel-button:focus, #panel .panel-button:checked {
