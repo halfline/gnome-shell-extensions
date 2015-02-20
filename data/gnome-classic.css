@@ -1053,13 +1053,13 @@ StScrollBar {
   .page-indicator .page-indicator-icon {
     width: 18px;
     height: 18px;
-    background-image: url(page-indicator-inactive.svg); }
+    background-image: url(resource:///org/gnome/shell/theme/age-indicator-inactive.svg); }
   .page-indicator:hover .page-indicator-icon {
-    background-image: url(page-indicator-hover.svg); }
+    background-image: url(resource:///org/gnome/shell/theme/age-indicator-hover.svg); }
   .page-indicator:active .page-indicator-icon {
-    background-image: url(page-indicator-active.svg); }
+    background-image: url(resource:///org/gnome/shell/theme/age-indicator-active.svg); }
   .page-indicator:checked .page-indicator-icon, .page-indicator:checked:active {
-    background-image: url(page-indicator-checked.svg); }
+    background-image: url(resource:///org/gnome/shell/theme/age-indicator-checked.svg); }
 
 .app-well-app > .overview-icon.overview-icon-with-label,
 .grid-search-result .overview-icon.overview-icon-with-label {
@@ -1586,7 +1586,7 @@ StScrollBar {
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4); }
 
 #lockDialogGroup {
-  background: #2e3436 url(noise-texture.png);
+  background: #2e3436 url(resource:///org/gnome/shell/theme/oise-texture.png);
   background-repeat: repeat; }
 
 #screenShieldNotifications StButton#vhandle, #screenShieldNotifications StButton#hhandle {
