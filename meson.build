@@ -54,6 +54,7 @@ all_extensions += [
   'auto-move-windows',
   'example',
   'native-window-placement',
+  'top-icons',
   'user-theme'
 ]
 
