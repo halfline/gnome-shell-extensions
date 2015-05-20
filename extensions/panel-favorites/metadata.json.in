@@ -1,0 +1,10 @@
+{
+"extension-id": "@extension_id@",
+"uuid": "@uuid@",
+"settings-schema": "@gschemaname@",
+"gettext-domain": "@gettext_domain@",
+"name": "Frippery Panel Favorites",
+"description": "Add launchers for Favorites to the panel",
+"shell-version": [ "@shell_current@" ],
+"url": "http://intgat.tigress.co.uk/rmy/extensions/index.html"
+}

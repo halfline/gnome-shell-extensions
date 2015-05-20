@@ -55,6 +55,7 @@ all_extensions += [
   'dash-to-dock',
   'example',
   'native-window-placement',
+  'panel-favorites',
   'top-icons',
   'user-theme'
 ]
