@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema path="/org/gnome/shell/extensions/updates-dialog/"
+          id="org.gnome.shell.extensions.updates-dialog">
+    <key name="grace-period" type="u">
+      <default>300</default>
+      <summary>Grace period in minutes</summary>
+      <description>
+        When the grace period is over, the computer will automatically
+        reboot and install security updates.
+      </description>
+    </key>
+    <key name="last-warning-period" type="u">
+      <default>10</default>
+      <summary>Last warning dialog period</summary>
+      <description>
+        A last warning dialog is displayed this many minutes before
+        the automatic reboot.
+      </description>
+    </key>
+    <key name="last-warnings" type="u">
+      <default>1</default>
+      <summary>Number of last warning dialogs</summary>
+      <description>
+        How many warning dialogs are displayed. Each is displayed at
+        'last-warning-period' minute intervals.
+      </description>
+    </key>
+  </schema>
+</schemalist>

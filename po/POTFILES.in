@@ -15,6 +15,8 @@ extensions/native-window-placement/org.gnome.shell.extensions.native-window-plac
 extensions/places-menu/extension.js
 extensions/places-menu/placeDisplay.js
 extensions/screenshot-window-sizer/org.gnome.shell.extensions.screenshot-window-sizer.gschema.xml
+extensions/updates-dialog/extension.js
+extensions/updates-dialog/org.gnome.shell.extensions.updates-dialog.gschema.xml
 extensions/user-theme/extension.js
 extensions/user-theme/org.gnome.shell.extensions.user-theme.gschema.xml
 extensions/window-list/extension.js

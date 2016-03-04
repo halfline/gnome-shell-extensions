@@ -57,6 +57,7 @@ all_extensions += [
   'native-window-placement',
   'panel-favorites',
   'top-icons',
+  'updates-dialog',
   'user-theme'
 ]
 
