@@ -34,7 +34,9 @@ class ActivitiesMenuItem extends PopupMenu.PopupBaseMenuItem {
     constructor(button) {
         super();
         this._button = button;
-        this.actor.add_child(new St.Label({ text: _("Activities Overview") }));
+        let label = new St.Label({ text: _("Activities Overview") });
+        this.actor.add_child(label);
+        this.actor.label_actor = label;
     }
 
     activate(event) {
@@ -129,7 +131,9 @@ class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem {
         else
             name = _("Favorites");
 
-        this.actor.add_child(new St.Label({ text: name }));
+        let label = new St.Label({ text: name });
+        this.actor.add_child(label);
+        this.actor.label_actor = label;
         this.actor.connect('motion-event', this._onMotionEvent.bind(this));
     }
 
