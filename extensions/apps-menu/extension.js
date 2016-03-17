@@ -36,7 +36,9 @@ const ActivitiesMenuItem = new Lang.Class({
     _init: function(button) {
 	this.parent();
         this._button = button;
-        this.actor.add_child(new St.Label({ text: _("Activities Overview") }));
+        let label = new St.Label({ text: _("Activities Overview") });
+        this.actor.add_child(label);
+        this.actor.label_actor = label;
     },
 
     activate: function(event) {
@@ -109,7 +111,9 @@ const CategoryMenuItem = new Lang.Class({
         else
             name = _("Favorites");
 
-        this.actor.add_child(new St.Label({ text: name }));
+        let label = new St.Label({ text: name });
+        this.actor.add_child(label);
+        this.actor.label_actor = label;
         this.actor.connect('motion-event', Lang.bind(this, this._onMotionEvent));
     },
 
