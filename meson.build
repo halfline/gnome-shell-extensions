@@ -57,6 +57,7 @@ all_extensions += [
   'native-window-placement',
   'no-hot-corner',
   'panel-favorites',
+  'systemMonitor',
   'top-icons',
   'updates-dialog',
   'user-theme'
