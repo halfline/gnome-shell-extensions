@@ -4,10 +4,12 @@ const Clutter = imports.gi.Clutter;
 const GTop = imports.gi.GTop;
 const Lang = imports.lang;
 const Mainloop = imports.mainloop;
+const Signals = imports.signals;
 const St = imports.gi.St;
 const Shell = imports.gi.Shell;
 
 const Main = imports.ui.main;
+const MessageList = imports.ui.messageList;
 const Tweener = imports.ui.tweener;
 
 const Gettext = imports.gettext.domain('gnome-shell-extensions');
@@ -29,18 +31,21 @@ const Indicator = new Lang.Class({
 
     _init: function() {
         this._initValues();
-        this.drawing_area = new St.DrawingArea({ reactive: true });
+        this.drawing_area = new St.DrawingArea();
         this.drawing_area.connect('repaint', Lang.bind(this, this._draw));
-        this.drawing_area.connect('button-press-event', function() {
+
+        this.actor = new St.Button({ style_class: "message message-content extension-systemMonitor-indicator-area",
+				      x_expand: true, x_fill: true,
+                                      y_fill: true, can_focus: true });
+        this.actor.add_actor(this.drawing_area);
+
+        this.actor.connect('clicked', function() {
             let app = Shell.AppSystem.get_default().lookup_app('gnome-system-monitor.desktop');
             app.open_new_window(-1);
-            return true;
-        });
 
-        this.actor = new St.Bin({ style_class: "extension-systemMonitor-indicator-area",
-                                  reactive: true, track_hover: true,
-				  x_fill: true, y_fill: true });
-        this.actor.add_actor(this.drawing_area);
+            Main.overview.hide();
+            Main.panel.closeCalendar();
+        });
 
         this._timeout = Mainloop.timeout_add(INDICATOR_UPDATE_INTERVAL, Lang.bind(this, function () {
             this._updateValues();
@@ -73,6 +78,7 @@ const Indicator = new Lang.Class({
         let y = stageY - this.label.get_height() - yOffset;
 
         this.label.set_position(x, y);
+        this.label.get_parent().set_child_above_sibling(this.label, null);
         Tweener.addTween(this.label,
                          { opacity: 255,
                            time: ITEM_LABEL_SHOW_TIME,
@@ -98,6 +104,14 @@ const Indicator = new Lang.Class({
                                this.label.hide();
                            })
                          });
+    },
+
+    /* MessageList.Message boilerplate */
+    canClose: function() {
+        return false;
+    },
+
+    clear: function() {
     },
 
     destroy: function() {
@@ -194,6 +208,7 @@ const Indicator = new Lang.Class({
         }
     }
 });
+Signals.addSignalMethods(Indicator.prototype); // For MessageList.Message compat
 
 const CpuIndicator = new Lang.Class({
     Name: 'SystemMonitor.CpuIndicator',
@@ -302,9 +317,7 @@ const Extension = new Lang.Class({
     },
 
     enable: function() {
-	this._box = new St.BoxLayout({ style_class: 'extension-systemMonitor-container',
-				       x_align: Clutter.ActorAlign.START,
-				       x_expand: true });
+	this._section = new MessageList.MessageListSection(_("System Monitor"));
 	this._indicators = [ ];
 
 	for (let i = 0; i < INDICATORS.length; i++) {
@@ -313,31 +326,18 @@ const Extension = new Lang.Class({
             indicator.actor.connect('notify::hover', Lang.bind(this, function() {
 		this._onHover(indicator);
 	    }));
-	    this._box.add_actor(indicator.actor);
+	    this._section.addMessage(indicator, false);
 	    this._indicators.push(indicator);
 	}
 
-	this._boxHolder = new St.BoxLayout({ x_expand: true,
-					     y_expand: true,
-					     x_align: Clutter.ActorAlign.START,
-					   });
-	let menuButton = Main.messageTray._messageTrayMenuButton.actor;
-	Main.messageTray.actor.remove_child(menuButton);
-	Main.messageTray.actor.add_child(this._boxHolder);
-
-	this._boxHolder.add_child(this._box);
-	this._boxHolder.add_child(menuButton);
+        Main.panel.statusArea.dateMenu._messageList._addSection(this._section);
+        this._section.actor.get_parent().set_child_at_index(this._section.actor, 0);
     },
 
     disable: function() {
 	this._indicators.forEach(function(i) { i.destroy(); });
 
-	let menuButton = Main.messageTray._messageTrayMenuButton.actor;
-	this._boxHolder.remove_child(menuButton);
-	Main.messageTray.actor.add_child(menuButton);
-
-	this._box.destroy();
-	this._boxHolder.destroy();
+        Main.panel.statusArea.dateMenu._messageList._removeSection(this._section);
     },
 
     _onHover: function (item) {
