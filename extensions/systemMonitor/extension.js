@@ -303,6 +303,24 @@ const MemoryIndicator = new Lang.Class({
     }
 });
 
+const SystemMonitorSection = new Lang.Class({
+    Name: 'SystemMonitorSection',
+    Extends: MessageList.MessageListSection,
+
+    _init: function() {
+        this.parent(_("System Monitor"));
+    },
+
+    _onTitleClicked: function() {
+        this.parent();
+
+        let appSys = Shell.AppSystem.get_default();
+        let app = appSys.lookup_app('gnome-system-monitor.desktop');
+        if (app)
+            app.open_new_window(-1);
+    }
+});
+
 const INDICATORS = [CpuIndicator, MemoryIndicator];
 
 const Extension = new Lang.Class({
@@ -317,7 +335,7 @@ const Extension = new Lang.Class({
     },
 
     enable: function() {
-	this._section = new MessageList.MessageListSection(_("System Monitor"));
+	this._section = new SystemMonitorSection();
 	this._indicators = [ ];
 
 	for (let i = 0; i < INDICATORS.length; i++) {
