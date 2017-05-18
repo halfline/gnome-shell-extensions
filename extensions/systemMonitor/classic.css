@@ -1,0 +1,6 @@
+@import url("stylesheet.css");
+
+.extension-systemMonitor-indicator-label {
+    background-color: rgba(237,237,237,0.9);
+    border: 1px solid #a1a1a1;
+}
