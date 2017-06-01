@@ -55,6 +55,7 @@ all_extensions += [
   'dash-to-dock',
   'example',
   'native-window-placement',
+  'no-hot-corner',
   'panel-favorites',
   'top-icons',
   'updates-dialog',

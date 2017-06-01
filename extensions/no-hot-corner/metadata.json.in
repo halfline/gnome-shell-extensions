@@ -1,0 +1,9 @@
+{
+"extension-id": "@extension_id@",
+"uuid": "@uuid@",
+"name": "No Topleft Hot Corner",
+"description": "Disable the hot corner in the top left; you can still reach the overview by clicking the Activities button or pressing the dedicated key.",
+"shell-version": [ "@shell_current@" ],
+"url": "https://github.com/HROMANO/nohotcorner/",
+"version": 15
+}
