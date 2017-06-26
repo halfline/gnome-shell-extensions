@@ -31,7 +31,7 @@ AC_SUBST([SHELL_VERSION])
 dnl keep this in alphabetic order
 CLASSIC_EXTENSIONS="apps-menu places-menu alternate-tab launch-new-instance window-list"
 DEFAULT_EXTENSIONS="$CLASSIC_EXTENSIONS drive-menu screenshot-window-sizer windowsNavigator workspace-indicator"
-ALL_EXTENSIONS="$DEFAULT_EXTENSIONS auto-move-windows example native-window-placement user-theme"
+ALL_EXTENSIONS="$DEFAULT_EXTENSIONS auto-move-windows dash-to-dock example native-window-placement panel-favorites top-icons updates-dialog user-theme"
 AC_SUBST(CLASSIC_EXTENSIONS, [$CLASSIC_EXTENSIONS])
 AC_SUBST(ALL_EXTENSIONS, [$ALL_EXTENSIONS])
 AC_ARG_ENABLE([extensions],
@@ -63,7 +63,7 @@ ENABLED_EXTENSIONS=
 for e in $enable_extensions; do
 	case $e in
 dnl		keep this in alphabetic order
-		alternate-tab|apps-menu|auto-move-windows|drive-menu|example|launch-new-instance|native-window-placement|places-menu|screenshot-window-sizer|user-theme|window-list|windowsNavigator|workspace-indicator)
+		alternate-tab|apps-menu|auto-move-windows|dash-to-dock|drive-menu|example|launch-new-instance|native-window-placement|panel-favorites|places-menu|screenshot-window-sizer|top-icons|updates-dialog|user-theme|window-list|windowsNavigator|workspace-indicator)
 			ENABLED_EXTENSIONS="$ENABLED_EXTENSIONS $e"
 			;;
 		*)
@@ -81,12 +81,16 @@ AC_CONFIG_FILES([
   extensions/alternate-tab/Makefile
   extensions/apps-menu/Makefile
   extensions/auto-move-windows/Makefile
+  extensions/dash-to-dock/Makefile
   extensions/drive-menu/Makefile
   extensions/example/Makefile
   extensions/launch-new-instance/Makefile
   extensions/native-window-placement/Makefile
+  extensions/panel-favorites/Makefile
   extensions/places-menu/Makefile
   extensions/screenshot-window-sizer/Makefile
+  extensions/top-icons/Makefile
+  extensions/updates-dialog/Makefile
   extensions/user-theme/Makefile
   extensions/window-list/Makefile
   extensions/windowsNavigator/Makefile
