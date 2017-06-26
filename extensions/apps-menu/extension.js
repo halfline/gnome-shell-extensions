@@ -1,6 +1,7 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 const Atk = imports.gi.Atk;
+const DND = imports.ui.dnd;
 const Gio = imports.gi.Gio;
 const GMenu = imports.gi.GMenu;
 const Lang = imports.lang;
@@ -8,6 +9,7 @@ const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 const Clutter = imports.gi.Clutter;
 const Main = imports.ui.main;
+const Meta = imports.gi.Meta;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Gtk = imports.gi.Gtk;
@@ -73,6 +75,23 @@ const ApplicationMenuItem = new Lang.Class({
                 textureCache.disconnect(iconThemeChangedId);
             }));
         this._updateIcon();
+
+        this.actor._delegate = this;
+        let draggable = DND.makeDraggable(this.actor);
+
+        let maybeStartDrag = draggable._maybeStartDrag;
+        draggable._maybeStartDrag = (event) => {
+            if (this._dragEnabled)
+                return maybeStartDrag.call(draggable, event);
+            return false;
+        };
+
+        draggable.connect('drag-begin', () => {
+            Shell.util_set_hidden_from_pick(Main.legacyTray.actor, true);
+        });
+        draggable.connect('drag-end', () => {
+            Shell.util_set_hidden_from_pick(Main.legacyTray.actor, false);
+        });
     },
 
     activate: function(event) {
@@ -88,8 +107,23 @@ const ApplicationMenuItem = new Lang.Class({
         this.parent(active, params);
     },
 
+    setDragEnabled: function(enable) {
+        if (this._dragEnabled == enable)
+            return;
+
+        this._dragEnabled = enable;
+    },
+
+    getDragActor: function() {
+        return this._app.create_icon_texture(APPLICATION_ICON_SIZE);
+    },
+
+    getDragActorSource: function() {
+        return this._iconBin;
+    },
+
     _updateIcon: function() {
-        this._iconBin.set_child(this._app.create_icon_texture(APPLICATION_ICON_SIZE));
+        this._iconBin.set_child(this.getDragActor());
     }
 });
 
@@ -251,6 +285,143 @@ const ApplicationsMenu = new Lang.Class({
     }
 });
 
+const DesktopTarget = new Lang.Class({
+    Name: 'DesktopTarget',
+
+    _init: function() {
+        this._desktopDestroyedId = 0;
+
+        this._windowAddedId =
+            global.window_group.connect('actor-added',
+                                        Lang.bind(this, this._onWindowAdded));
+
+        global.get_window_actors().forEach(a => {
+            this._onWindowAdded(a.get_parent(), a);
+        });
+    },
+
+    get hasDesktop() {
+        return this._desktop != null;
+    },
+
+    _onWindowAdded: function(group, actor) {
+        if (!(actor instanceof Meta.WindowActor))
+            return;
+
+        if (actor.meta_window.get_window_type() == Meta.WindowType.DESKTOP)
+            this._setDesktop(actor);
+    },
+
+    _setDesktop: function(desktop) {
+        if (this._desktop) {
+            this._desktop.disconnect(this._desktopDestroyedId);
+            this._desktopDestroyedId = 0;
+
+            delete this._desktop._delegate;
+        }
+
+        this._desktop = desktop;
+        this.emit('desktop-changed');
+
+        if (this._desktop) {
+            this._desktopDestroyedId = this._desktop.connect('destroy', () => {
+                this._setDesktop(null);
+            });
+            this._desktop._delegate = this;
+        }
+    },
+
+    _getSourceAppInfo: function(source) {
+        if (!(source instanceof ApplicationMenuItem))
+            return null;
+        return source._app.app_info;
+    },
+
+    _touchFile: function(file) {
+        let queryFlags = Gio.FileQueryInfoFlags.NONE;
+        let ioPriority = GLib.PRIORITY_DEFAULT;
+
+        let info = new Gio.FileInfo();
+        info.set_attribute_uint64(Gio.FILE_ATTRIBUTE_TIME_ACCESS,
+                                  GLib.get_real_time());
+        file.set_attributes_async (info, queryFlags, ioPriority, null,
+            (o, res) => {
+                try {
+                    o.set_attributes_finish(res);
+                } catch(e) {
+                    log('Failed to update access time: ' + e.message);
+                }
+            });
+    },
+
+    _markTrusted: function(file) {
+        let modeAttr = Gio.FILE_ATTRIBUTE_UNIX_MODE;
+        let trustedAttr = 'metadata::trusted';
+        let queryFlags = Gio.FileQueryInfoFlags.NONE;
+        let ioPriority = GLib.PRIORITY_DEFAULT;
+
+        file.query_info_async(modeAttr, queryFlags, ioPriority, null,
+            (o, res) => {
+                try {
+                    let info = o.query_info_finish(res);
+                    let mode = info.get_attribute_uint32(modeAttr) | 0100;
+
+                    info.set_attribute_uint32(modeAttr, mode);
+                    info.set_attribute_string(trustedAttr, 'yes');
+                    file.set_attributes_async (info, queryFlags, ioPriority, null,
+                        (o, res) => {
+                            o.set_attributes_finish(res);
+
+                            // Hack: force nautilus to reload file info
+                            this._touchFile(file);
+                        });
+                } catch(e) {
+                    log('Failed to mark file as trusted: ' + e.message);
+                }
+            });
+    },
+
+    destroy: function() {
+        if (this._windowAddedId)
+            global.window_group.disconnect(this._windowAddedId);
+        this._windowAddedId = 0;
+
+        this._setDesktop(null);
+    },
+
+    handleDragOver: function(source, actor, x, y, time) {
+        let appInfo = this._getSourceAppInfo(source);
+        if (!appInfo)
+            return DND.DragMotionResult.CONTINUE;
+
+        return DND.DragMotionResult.COPY_DROP;
+    },
+
+    acceptDrop: function(source, actor, x, y, time) {
+        let appInfo = this._getSourceAppInfo(source);
+        if (!appInfo)
+            return false;
+
+        this.emit('app-dropped');
+
+        let desktop = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP);
+
+        let src = Gio.File.new_for_path(appInfo.get_filename());
+        let dst = Gio.File.new_for_path(GLib.build_filenamev([desktop, src.get_basename()]));
+
+        try {
+            // copy_async() isn't introspectable :-(
+            src.copy(dst, Gio.FileCopyFlags.OVERWRITE, null, null);
+            this._markTrusted(dst);
+        } catch(e) {
+            log('Failed to copy to desktop: ' + e.message);
+        }
+
+        return true;
+    }
+});
+Signals.addSignalMethods(DesktopTarget.prototype);
+
 const ApplicationsButton = new Lang.Class({
     Name: 'ApplicationsButton',
     Extends: PanelMenu.Button,
@@ -296,6 +467,16 @@ const ApplicationsButton = new Lang.Class({
                                    Lang.bind(this, this._setKeybinding));
         this._setKeybinding();
 
+        this._desktopTarget = new DesktopTarget();
+        this._desktopTarget.connect('app-dropped', () => {
+            this.menu.close();
+        });
+        this._desktopTarget.connect('desktop-changed', () => {
+            for (let item of this._applicationsButtons.values())
+                item.setDragEnabled(this._desktopTarget.hasDesktop);
+        });
+
+        this._applicationsButtons = new Map();
         this.reloadFlag = false;
         this._createLayout();
         this._display();
@@ -339,6 +520,8 @@ const ApplicationsButton = new Lang.Class({
                                            Main.sessionMode.hasOverview ?
                                            Lang.bind(Main.overview, Main.overview.toggle) :
                                            null);
+
+        this._desktopTarget.destroy();
     },
 
     _onCapturedEvent: function(actor, event) {
@@ -504,7 +687,7 @@ const ApplicationsButton = new Lang.Class({
     },
 
     _display: function() {
-        this._applicationsButtons = new Array();
+        this._applicationsButtons.clear();
         this.mainBox.style=('width: 35em;');
         this.mainBox.hide();
 
@@ -563,12 +746,14 @@ const ApplicationsButton = new Lang.Class({
          if (apps) {
             for (let i = 0; i < apps.length; i++) {
                let app = apps[i];
-               if (!this._applicationsButtons[app]) {
-                  let applicationMenuItem = new ApplicationMenuItem(this, app);
-                  this._applicationsButtons[app] = applicationMenuItem;
+               let item = this._applicationsButtons.get(app);
+               if (!item) {
+                  item = new ApplicationMenuItem(this, app);
+                  item.setDragEnabled(this._desktopTarget.hasDesktop);
+                  this._applicationsButtons.set(app, item);
                }
-               if (!this._applicationsButtons[app].actor.get_parent())
-                  this.applicationsBox.add_actor(this._applicationsButtons[app].actor);
+               if (!item.actor.get_parent())
+                  this.applicationsBox.add_actor(item.actor);
             }
          }
     },
