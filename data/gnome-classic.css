@@ -1626,9 +1626,11 @@ StScrollBar {
 .login-dialog-message-warning {
   color: #f57900; }
 
-.login-dialog-message-hint {
+.login-dialog-message-hint, .login-dialog-message {
+  color: #bebeb6;
   padding-top: 0;
-  padding-bottom: 20px; }
+  padding-bottom: 20px;
+  min-height: 2.75em; }
 
 .login-dialog-user-selection-box {
   padding: 100px 0px; }
