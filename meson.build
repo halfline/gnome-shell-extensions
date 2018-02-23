@@ -38,6 +38,7 @@ classic_extensions = [
   'apps-menu',
   'places-menu',
   'launch-new-instance',
+  'top-icons',
   'window-list'
 ]
 
@@ -58,7 +59,6 @@ all_extensions += [
   'no-hot-corner',
   'panel-favorites',
   'systemMonitor',
-  'top-icons',
   'updates-dialog',
   'user-theme'
 ]
