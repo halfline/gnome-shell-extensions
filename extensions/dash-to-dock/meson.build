@@ -18,4 +18,4 @@ extension_sources += files([
   'windowPreview.js'])
 extension_schemas += files(metadata_conf.get('gschemaname') + '.gschema.xml')
 
-install_data('media/logo.svg', install_dir: join_paths(extensiondir, uuid, 'media')
+install_data('media/logo.svg', install_dir: join_paths(extensiondir, uuid, 'media'))
