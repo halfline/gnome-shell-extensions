@@ -52,8 +52,13 @@ default_extensions += [
 all_extensions = default_extensions
 all_extensions += [
   'auto-move-windows',
+  'dash-to-dock',
   'example',
   'native-window-placement',
+  'no-hot-corner',
+  'panel-favorites',
+  'top-icons',
+  'updates-dialog',
   'user-theme'
 ]
 
